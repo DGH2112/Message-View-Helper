@@ -1,0 +1,12 @@
+/*
+
+  This is a Windows Resource File which generates a Splash Screen and About Box Icons for the
+  RAD Studio IDEs.
+
+  @Author  David Hoyle
+  @Version 1.0
+  @Date    26 Feb 2017
+
+*/
+MessageViewHelper48x48 BITMAP "..\Images\MessageViewHelper48x48.bmp"
+MessageViewHelper24x24 BITMAP "..\Images\MessageViewHelper24x24.bmp"

@@ -1,0 +1,27 @@
+[Setup]
+WarnBefore=0
+WarnAfter=0
+IncBuild=1
+CopyVersionInfoFrom=
+ExcludedResExts=.dcr
+EnabledVersionInfo=1
+IncludeInProject=1
+CompileWithBRCC32=0
+MajorVer=1
+MinorVer=0
+ReleaseVer=0
+BuildVer=103
+ResourceName=MsgViewHelperITHVerInfo
+
+[VersionInfo]
+CompanyName=Season's Fall Music
+FileDescription=MsgViewHelper: A RAD Studio IDE plug-in to provide automatic and manual opening and closing of the message view.
+FileVersion=1.0.0.103
+InternalName=MsgViewHelper
+LegalCopyright=Season's Fall Music
+LegalTrademarks=Season's Fall Music
+OriginalFilename=MsgViewHelper
+ProductName=MsgViewHelper
+ProductVersion=1.0
+Comments=MsgViewHelper: A RAD Studio IDE plug-in to provide automatic and manual opening and closing of the message view.
+
