@@ -4,26 +4,22 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.OptionsForm;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
 Uses
-  Winapi.Windows,
-  Winapi.Messages,
-  System.SysUtils,
-  System.Variants,
-  System.Classes,
-  Vcl.Graphics,
-  Vcl.Controls,
-  Vcl.Forms,
-  Vcl.Dialogs,
-  Vcl.ExtCtrls,
-  Vcl.StdCtrls,
-  Vcl.Buttons,
+  {$IFDEF DXE20}System.Classes{$ELSE}Classes{$ENDIF},
+  {$IFDEF DXE20}Vcl.Controls{$ELSE}Controls{$ENDIF},
+  {$IFDEF DXE20}Vcl.Forms{$ELSE}Forms{$ENDIF},
+  {$IFDEF DXE20}Vcl.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
+  {$IFDEF DXE20}Vcl.StdCtrls{$ELSE}StdCtrls{$ENDIF},
+  {$IFDEF DXE20}Vcl.Buttons{$ELSE}Buttons{$ENDIF},
   MsgViewHelper.OptionsFrame;
 
 Type

@@ -4,12 +4,14 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.Functions;
 
 Interface
+
+{$INCLUDE CompilerDefinitions.inc}
 
   Function INIFileName : String;
   Procedure BuildNumber(var iMajor, iMinor, iBugFix, iBuild : Integer);
@@ -17,9 +19,9 @@ Interface
 Implementation
 
 Uses
-  System.SysUtils,
-  WinAPI.WIndows,
-  WinAPI.SHFolder;
+  {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
+  {$IFDEF DXE20}WinAPI.Windows{$ELSE}Windows{$ENDIF},
+  {$IFDEF DXE20}WinAPI.SHFolder{$ELSE}SHFolder{$ENDIF};
 
 (**
 

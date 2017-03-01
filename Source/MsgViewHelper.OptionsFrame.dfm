@@ -36,16 +36,4 @@ object frameMVHOptions: TframeMVHOptions
     Caption = '&Enable Automatic Hiding After Successfult Compilation'
     TabOrder = 1
   end
-  object gbxOptions: TRadioGroup
-    Left = 3
-    Top = 67
-    Width = 348
-    Height = 70
-    Anchors = [akLeft, akTop, akRight]
-    Caption = 'Options'
-    Items.Strings = (
-      'Hide / Show Docking &Panel'
-      'Hide / Show Docking &Tabs')
-    TabOrder = 2
-  end
 end

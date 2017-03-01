@@ -4,7 +4,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    27 Feb 2017
 
 **)
 Unit MsgViewHelper.Constants;
@@ -26,9 +26,7 @@ Const
   (** A constant array of default options for the application (used to load and save ini
       information). **)
   DefaultOptions : Array[Low(TMVHBoolOption)..High(TMVHBoolOption)] Of TDefaultOptions = (
-    (FOptionName: 'EnabledHiding'; FDefault: True),
-    (FOptionName: 'HideDockPanel'; FDefault: False),
-    (FOptionName: 'HideDockTab';   FDefault: True)
+    (FOptionName: 'EnabledHiding'; FDefault: True)
   );
 
 Implementation

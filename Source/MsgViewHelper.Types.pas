@@ -4,7 +4,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    27 Feb 2017
 
 **)
 Unit MsgViewHelper.Types;
@@ -21,9 +21,7 @@ Type
   TMsgViewStates = Set Of TMsgViewState;
   (** An enumerate of boolean options for the application. **)
   TMVHBoolOption = (
-    mvhoEnabled, // Enable automatic closing of the message window
-    mvhoPanel,   // Close only the dock panel if the window is docked to a panel
-    mvhoTabs     // Close the tab set the panel is docked to.
+    mvhoEnabled  // Enable automatic closing of the message window
   );
   (** A set of the above options. **)
   TMVHBoolOptions = Set Of TMVHBoolOption;

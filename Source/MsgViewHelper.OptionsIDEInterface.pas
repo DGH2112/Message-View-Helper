@@ -5,17 +5,21 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.OptionsIDEInterface;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
+{$IFDEF DXE00}
+
 Uses
   ToolsAPI,
   MsgViewHelper.OptionsFrame,
-  VCL.Forms;
+  {$IFDEF DXE20}VCL.Forms{$ELSE}Forms{$ENDIF};
 
 Type
   (** A class which implements the INTAAddingOptions interface to added options frames
@@ -40,11 +44,14 @@ Type
     Class Procedure AddOptionsFrameHandler;
     Class Procedure RemoveOptionsFrameHandler;
   End;
+{$ENDIF}
 
 Implementation
 
+{$IFDEF DXE00}
+
 Uses
-  System.SysUtils;
+  {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF};
 
 (**
 
@@ -217,5 +224,7 @@ Function TMVHIDEOptionsHandler.ValidateContents: Boolean;
 Begin
   Result := True;
 End;
+
+{$ENDIF}
 
 End.

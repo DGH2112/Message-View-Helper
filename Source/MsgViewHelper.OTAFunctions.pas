@@ -5,12 +5,14 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.OTAFunctions;
 
 Interface
+
+{$INCLUDE CompilerDefinitions.inc}
 
   Procedure ToggleMessageView;
   Procedure HideMessageView;
@@ -19,10 +21,10 @@ Implementation
 
 Uses
   ToolsAPI,
-  VCL.Forms,
-  System.SysUtils,
-  VCL.Controls,
-  Vcl.ExtCtrls,
+  {$IFDEF DXE20}VCL.Forms{$ELSE}Forms{$ENDIF},
+  {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
+  {$IFDEF DXE20}VCL.Controls{$ELSE}Controls{$ENDIF},
+  {$IFDEF DXE20}Vcl.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
   MsgViewHelper.Constants,
   MsgViewHelper.Types;
 
