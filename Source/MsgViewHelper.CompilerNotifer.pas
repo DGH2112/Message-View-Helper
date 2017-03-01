@@ -5,16 +5,18 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.CompilerNotifer;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
 Uses
   ToolsAPI,
-  VCL.ExtCtrls,
+  {$IFDEF DXE20}VCL.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
   MsgViewHelper.Interfaces;
 
 Type
@@ -41,7 +43,7 @@ Type
 Implementation
 
 Uses
-  System.SysUtils,
+  {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
   MsgViewHelper.OTAFunctions,
   MsgViewHelper.Options,
   MsgViewHelper.Types;
@@ -188,9 +190,9 @@ End;
 Procedure TMVHCompileNotifier.ProjectGroupCompileFinished(Result: TOTACompileResult);
 
 Begin
-  If (Result = crOTASucceeded) And (mvhoEnabled In MVHOptions.Options) Then
+  If (Result = crOTASucceeded) And (mvhoEnabled In TMVHOptions.MVHOptions.Options) Then
     Begin
-      FTimer.Interval := MVHOptions.HideMessageViewDelay;
+      FTimer.Interval := TMVHOptions.MVHOptions.HideMessageViewDelay;
       FTimer.Enabled := True;
     End;
 End;

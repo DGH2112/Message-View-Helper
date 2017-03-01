@@ -5,15 +5,17 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.Wizard;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
 Uses
-  VCL.ActnList,
+  {$IFDEF DXE20}VCL.ActnList{$ELSE}ActnList{$ENDIF},
   ToolsAPI,
   MsgViewHelper.Interfaces;
 
@@ -53,12 +55,10 @@ Implementation
 
 Uses
   MsgViewHelper.OTAFunctions,
-  VCL.Forms,
-  System.SysUtils,
-  VCL.Menus,
+  {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
+  {$IFDEF DXE20}VCL.Menus{$ELSE}Menus{$ENDIF},
   MsgViewHelper.CompilerNotifer,
   MsgViewHelper.Options,
-  Vcl.Controls,
   MsgViewHelper.Types,
   MsgViewHelper.SplashScreen,
   MsgViewHelper.AboutBox,
@@ -136,11 +136,13 @@ Begin
       FToggleMsgViewAction.Name := 'DGHMsgViewHelperToggleMessageView';
       FToggleMsgViewAction.Caption := 'Toggle Message View';
       FToggleMsgViewAction.OnExecute := ToggleMessageViewAction;
-      FToggleMsgViewAction.ShortCut := MVHOptions.MessageViewShortCut;
+      FToggleMsgViewAction.ShortCut := TMVHOptions.MVHOptions.MessageViewShortCut;
       FToggleMsgViewAction.Category := 'OTATemplateMenus';
     End;
   FCompileNotifierIndex := InstallCompileNotifier;
+  {$IFDEF DXE00}
   TMVHIDEOptionsHandler.AddOptionsFrameHandler;
+  {$ENDIF}
 End;
 
 (**
@@ -154,7 +156,9 @@ End;
 Destructor TMVHWizard.Destroy;
 
 Begin
+  {$IFDEF DXE00}
   TMVHIDEOptionsHandler.RemoveOptionsFrameHandler;
+  {$ENDIF}
   RemoveCompileNotifier(FCompileNotifierIndex);
   If FToggleMsgViewAction <> Nil Then
     FToggleMsgViewAction.Free;
@@ -197,7 +201,7 @@ Begin
   {$ELSE}
   If TfrmMVHOptions.Execute Then
   {$ENDIF}
-  FToggleMsgViewAction.ShortCut := MVHOptions.MessageViewShortCut;
+  FToggleMsgViewAction.ShortCut := TMVHOptions.MVHOptions.MessageViewShortCut;
 End;
 
 (**

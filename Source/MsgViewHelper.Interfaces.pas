@@ -5,15 +5,17 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    25 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.Interfaces;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
 Uses
-  System.Classes,
+  {$IFDEF DXE20}System.Classes{$ELSE}Classes{$ENDIF},
   MsgViewHelper.Types;
 
 Type

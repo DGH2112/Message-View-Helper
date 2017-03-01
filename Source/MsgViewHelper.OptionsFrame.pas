@@ -6,20 +6,21 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.OptionsFrame;
 
 Interface
 
+{$INCLUDE CompilerDefinitions.inc}
+
 Uses
-  Vcl.Forms,
-  Vcl.ComCtrls,
-  Vcl.StdCtrls,
-  Vcl.Controls,
-  System.Classes,
-  Vcl.ExtCtrls;
+  {$IFDEF DXE20}Vcl.Forms{$ELSE}Forms{$ENDIF},
+  {$IFDEF DXE20}Vcl.ComCtrls{$ELSE}ComCtrls{$ENDIF},
+  {$IFDEF DXE20}Vcl.StdCtrls{$ELSE}StdCtrls{$ENDIF},
+  {$IFDEF DXE20}Vcl.Controls{$ELSE}Controls{$ENDIF},
+  {$IFDEF DXE20}System.Classes{$ELSE}Classes{$ENDIF};
 
 Type
   (** A frame to host the applications options so they can be shown in either the IDEs options
@@ -28,7 +29,6 @@ Type
     lblToggleMessageView: TLabel;
     hkTogglerMessageView: THotKey;
     chkEnable: TCheckBox;
-    gbxOptions: TRadioGroup;
   Private
     { Private declarations }
   Public
@@ -61,15 +61,11 @@ Var
   Ops : TMVHBoolOptions;
 
 Begin
-  MVHOptions.MessageViewShortCut := hkTogglerMessageView.HotKey;
+  TMVHOptions.MVHOptions.MessageViewShortCut := hkTogglerMessageView.HotKey;
   Ops := [];
   If chkEnable.Checked Then
     Include(Ops, mvhoEnabled);
-  If gbxOptions.ItemIndex = 0 Then
-    Include(Ops, mvhoPanel)
-  Else
-    Include(Ops, mvhoTabs);
-  MVHOptions.Options := Ops;
+  TMVHOptions.MVHOptions.Options := Ops;
 End;
 
 (**
@@ -83,12 +79,8 @@ End;
 Procedure TframeMVHOptions.InitialiseFrame;
 
 Begin
-  hkTogglerMessageView.HotKey := MVHOptions.MessageViewShortCut;
-  chkEnable.Checked := mvhoEnabled In MVHOptions.Options;
-  If mvhoPanel In MVHOptions.Options Then
-    gbxOptions.ItemIndex := 0
-  Else
-    gbxOptions.ItemIndex := 1;
+  hkTogglerMessageView.HotKey := TMVHOptions.MVHOptions.MessageViewShortCut;
+  chkEnable.Checked := mvhoEnabled In TMVHOptions.MVHOptions.Options;
 End;
 
 End.

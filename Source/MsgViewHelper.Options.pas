@@ -5,33 +5,27 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    01 Mar 2017
 
 **)
 Unit MsgViewHelper.Options;
 
 Interface
 
-Uses
-  MsgViewHelper.Interfaces;
-
-Var
-  (** A global variable to provide access to the options interface throughout the application. **)
-  MVHOptions : IMVHOptions;
-
-Implementation
+{$INCLUDE CompilerDefinitions.inc}
 
 Uses
-  System.Classes,
+  {$IFDEF DXE20}System.Classes{$ELSE}Classes{$ENDIF},
   MsgViewHelper.Types,
-  MsgViewHelper.Constants,
-  INIFiles,
-  MsgViewHelper.Functions,
-  VCL.Menus;
+  MsgViewHelper.Interfaces;
 
 Type
   (** A class which implements the IMVHOptions interface. **)
   TMVHOptions = Class(TInterfacedObject, IMVHOptions)
+  Strict Private
+    Class Var
+      (** A class variable to hold the instance of the application options interface. **)
+      FMVHOptions : IMVHOptions;
   Strict Private
     FMessageViewShortCut:  TShortcut;
     FHideMessageViewDelay: Integer;
@@ -47,7 +41,16 @@ Type
   Public
     Constructor Create;
     Destructor Destroy; Override;
+    Class Function MVHOptions : IMVHOptions;
   End;
+
+Implementation
+
+Uses
+  MsgViewHelper.Constants,
+  INIFiles,
+  MsgViewHelper.Functions,
+  {$IFDEF DXE20}VCL.Menus{$ELSE}Menus{$ENDIF};
 
 { TMVHOptions }
 
@@ -161,6 +164,25 @@ End;
 
 (**
 
+  This is a class method to provide a singleton interfaces to the applications options.
+
+  @precon  None.
+  @postcon If the options do not exist they are created and reference to a class var for future
+           use.
+
+  @return  an IMVHOptions
+
+**)
+Class Function TMVHOptions.MVHOptions: IMVHOptions;
+
+Begin
+  If Not Assigned(FMVHOptions) Then
+    FMVHOptions := TMVHOptions.Create;
+  Result := FMVHOptions;
+End;
+
+(**
+
   This is a setter method for the HideMessageViewDelay property.
 
   @precon  None.
@@ -210,8 +232,4 @@ Begin
     FBoolOptions := sOptions;;
 End;
 
-(** This creates an instance of the options class referenced through its interface. **)
-Initialization
-  MVHOptions := TMVHOptions.Create;
 End.
-
