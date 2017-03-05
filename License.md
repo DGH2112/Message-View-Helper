@@ -4,7 +4,7 @@ Author:  David Hoyle
 
 Version: 1.0
 
-Date:    28 Feb 2017
+Date:    05 Mar 2017
 
 
 
@@ -23,10 +23,10 @@ the code be used in a commercial product with out the author's consent.
 
 regards
 
-David Hoyle (c) 28 Feb 2017
+David Hoyle (c) 05 Mar 2017
 
 davidghoyle@gmail.com
 
-http://www.davidghoyle.co.uk/WordPress/?page_id=####
+http://http://www.davidghoyle.co.uk/WordPress/?page_id=1590
 
 Season's Fall Music

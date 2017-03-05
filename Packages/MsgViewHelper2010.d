@@ -6,7 +6,7 @@
 		C:\Program Files (x86)\Embarcadero\RAD Studio\7.0\\lib\vcl.dcp \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\7.0\\lib\rtl.dcp \
 		..\Source\MsgViewHelper.OptionsIDEInterface.dcu \
-		..\Source\MsgViewHelper.OptionsForm.dcu \
+		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.OptionsForm.dcu \
 		..\Source\MsgViewHelper.AboutBox.dcu \
 		..\Source\MsgViewHelper.SplashScreen.dcu \
 		..\Source\MsgViewHelper.ResourceStrings.dcu \
@@ -15,8 +15,8 @@
 		..\Source\MsgViewHelper.Functions.dcu \
 		..\Source\MsgViewHelper.Interfaces.dcu \
 		..\Source\MsgViewHelper.Options.dcu \
-		..\Source\MsgViewHelper.OptionsFrame.dcu \
+		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.OptionsFrame.dcu \
 		..\Source\MsgViewHelper.CompilerNotifer.dcu \
-		..\Source\MsgViewHelper.OTAFunctions.dcu \
-		..\Source\MsgViewHelper.Wizard.dcu \
+		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.OTAFunctions.dcu \
+		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.Wizard.dcu \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\7.0\\lib\SysInit.dcu

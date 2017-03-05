@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    01 Mar 2017
+  @Date    05 Mar 2017
 
 **)
 Unit MsgViewHelper.OTAFunctions;
@@ -101,7 +101,7 @@ Var
 
 Begin
   Result := Nil;
-  P := SourceControl; // .Parent;
+  P := SourceControl;
   While Assigned(P) Do
     Begin
       If IsDockableClassName(P) Then
@@ -113,6 +113,47 @@ Begin
    End;
 End;
 
+(**
+
+  This method determines whether the message view has focus by looking at what the main forms
+  active control is. Returns true if the active control has the classname
+  "TBetterHintWindowVirtualDrawTree".
+
+  @precon  None.
+  @postcon Returns true of the message view is the active control.
+
+  @return  a Boolean
+
+**)
+Function IsMessageViewFocused : Boolean;
+
+Var
+  strActiveControl: String;
+
+Begin
+  Result := False;
+  If Assigned(Application.MainForm.ActiveControl) Then
+    Begin
+      strActiveControl := Application.MainForm.ActiveControl.ClassName;
+      Result := CompareText(strActiveControl, 'TBetterHintWindowVirtualDrawTree') = 0;
+    End;
+End;
+
+(**
+
+  This method returned and set contain enumerate values saying whether the message window is
+  visible and focused. It also returns via VAR parameter the message form instance and if docked
+  the dock windows control reference.
+
+  @precon  None.
+  @postcon Returns a set says whether the message view is visible and focused along with the form
+           instance and docking site (if docked).
+
+  @param   Form     as a TForm as a reference
+  @param   DockSite as a TWinControl as a reference
+  @return  a TMsgViewStates
+
+**)
 Function IsMessageViewVisible(Var Form : TForm; Var DockSite : TWinControl) : TMsgViewStates;
 
 Begin
@@ -122,30 +163,36 @@ Begin
   If Assigned(Form) Then
     Begin
       If Form.Floating Then
+        // If floating
         Begin
           If Form.Visible Then
             Include(Result, mvsVisible);
-          If CompareText(Form.Caption, 'Messages') = 0 Then
+          If Form.Active Then
             Include(Result, mvsFocused);
         End Else
+        // If Docked
         Begin
           DockSite := FindDockSite(Form);
           If DockSite Is TWinControl Then
             Begin
+              // If docked to a panel we don't want to hide the panel but the message window.
               If DockSite Is TPanel Then
                 Begin
                   If Form.Visible Then
-                    Include(Result, mvsVisible);
-                  Include(Result, mvsFocused);
+                    Begin
+                      Include(Result, mvsVisible);
+                      If IsMessageViewFocused Then
+                        Include(Result, mvsFocused);
+                    End;
                   DockSite := Nil;
                 End Else
+                // If docked to a tabset we do want to hide the dock tabset
                 Begin
                   If DockSite.Visible Then
                     Begin
                       Include(Result, mvsVisible);
-                      If DockSite Is TForm Then
-                        If CompareText((DockSite As TForm).Caption, 'Messages') = 0 Then
-                          Include(Result, mvsFocused);
+                      If IsMessageViewFocused Then
+                        Include(Result, mvsFocused);
                     End;
                 End;
             End;
@@ -160,13 +207,21 @@ End;
   @precon  None.
   @postcon The message view is displayed.
 
+  @param   Form     as a TForm
+  @param   DockSite as a TWinControl
+
 **)
-Procedure ShowMessageView;
+Procedure ShowMessageView(Form : TForm; DockSite : TWinControl);
 
 Var
   MsgServices: IOTAMessageServices;
 
 Begin
+  If Assigned(DockSite) Then
+    DockSite.Show
+  Else
+    Form.Show;
+  Form.SetFocus;
   If Supports(BorlandIDEServices, IOTAMessageServices, MsgServices) Then
     MsgServices.ShowMessageView(MsgServices.GetGroup('Build'));
 End;
@@ -184,23 +239,23 @@ Procedure ToggleMessageView;
 Var
   Form: TForm;
   DockSite: TWinControl;
-  MsgViewState : TMsgViewStates;
+  MsgViewStates : TMsgViewStates;
 
 Begin
-  MsgViewState := IsMessageViewVisible(Form, DockSite);
+  MsgViewStates := IsMessageViewVisible(Form, DockSite);
   If Assigned(Form) Then
-    If mvsVisible In MsgViewState Then
+    If mvsVisible In MsgViewStates Then
       Begin
-        If mvsFocused In MsgViewState Then
+        If mvsFocused In MsgViewStates Then
           Begin
             If Assigned(DockSite) Then
               DockSite.Hide
             Else
               Form.Hide;
           End Else
-            ShowMessageView;
+            ShowMessageView(Form, DockSite);
       End Else
-        ShowMessageView;
+        ShowMessageView(Form, DockSite);
 End;
 
 (**
@@ -228,6 +283,7 @@ Begin
 End;
 
 End.
+
 
 
 

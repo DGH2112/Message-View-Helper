@@ -6,7 +6,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    01 Mar 2017
+  @Date    04 Mar 2017
 
 **)
 Unit MsgViewHelper.OptionsFrame;
@@ -29,6 +29,9 @@ Type
     lblToggleMessageView: TLabel;
     hkTogglerMessageView: THotKey;
     chkEnable: TCheckBox;
+    lblAutomaticDelay: TLabel;
+    edtAutomaticDelay: TEdit;
+    udAutomaticDelay: TUpDown;
   Private
     { Private declarations }
   Public
@@ -66,6 +69,7 @@ Begin
   If chkEnable.Checked Then
     Include(Ops, mvhoEnabled);
   TMVHOptions.MVHOptions.Options := Ops;
+  TMVHOptions.MVHOptions.HideMessageViewDelay := udAutomaticDelay.Position * 1000;
 End;
 
 (**
@@ -81,6 +85,7 @@ Procedure TframeMVHOptions.InitialiseFrame;
 Begin
   hkTogglerMessageView.HotKey := TMVHOptions.MVHOptions.MessageViewShortCut;
   chkEnable.Checked := mvhoEnabled In TMVHOptions.MVHOptions.Options;
+  udAutomaticDelay.Position := TMVHOptions.MVHOptions.HideMessageViewDelay Div 1000;
 End;
 
 End.
