@@ -1,10 +1,10 @@
 
 ..\MsgViewHelperXE.bpl MsgViewHelperXE.dcp: MsgViewHelperXE.dpk \
+		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\rtl.dcp \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\designide.dcp \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\xmlrtl.dcp \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\vclactnband.dcp \
 		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\vcl.dcp \
-		C:\Program Files (x86)\Embarcadero\RAD Studio\8.0\\lib\win32\release\rtl.dcp \
 		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.OptionsIDEInterface.dcu \
 		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.OptionsForm.dcu \
 		D:\HoylD\RAD Studio\IDE Addins\Message View Helper\Source\MsgViewHelper.AboutBox.dcu \

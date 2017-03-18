@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    01 Mar 2017
+  @Date    14 Mar 2017
 
 **)
 Unit MsgViewHelper.CompilerNotifer;
@@ -23,7 +23,8 @@ Type
   (** A class to implement the IOTACompileNotifier interface. **)
   TMVHCompileNotifier = Class(TInterfacedObject, IOTACompileNotifier)
   Strict Private
-    FTimer      : TTimer;
+    FTimer       : TTimer;
+    FDesktopName : String;
   Strict Protected
     // IOTACompileNotifier
     Procedure ProjectCompileFinished(Const Project: IOTAProject; Result: TOTACompileResult);
@@ -106,8 +107,11 @@ End;
 Procedure TMVHCompileNotifier.CloseMessageView(Sender: TObject);
 
 Begin
-  FTimer.Enabled := False;
-  HideMessageView;
+  If CompareText(FDesktopName, CurrentDesktopName) = 0 Then
+    Begin
+      FTimer.Enabled := False;
+      HideMessageView;
+    End;
 End;
 
 (**
@@ -191,10 +195,12 @@ Procedure TMVHCompileNotifier.ProjectGroupCompileFinished(Result: TOTACompileRes
 
 Begin
   If (Result = crOTASucceeded) And (mvhoEnabled In TMVHOptions.MVHOptions.Options) Then
-    Begin
-      FTimer.Interval := TMVHOptions.MVHOptions.HideMessageViewDelay;
-      FTimer.Enabled := True;
-    End;
+    If Not HasErrorOrWarningMsgs Then
+      Begin
+        FTimer.Interval := TMVHOptions.MVHOptions.HideMessageViewDelay;
+        FDesktopName := CurrentDesktopName;
+        FTimer.Enabled := True;
+      End;
 End;
 
 (**
@@ -202,15 +208,15 @@ End;
   This event is called before all projects are compiled.
 
   @precon  None.
-  @postcon None.
+  @postcon Ensures the timer is stopped.
 
   @param   Mode as a TOTACompileMode
 
 **)
 Procedure TMVHCompileNotifier.ProjectGroupCompileStarted(Mode: TOTACompileMode);
 
-Begin //FI:W519
-  // Do nothing.
+Begin
+  FTimer.Enabled := False;
 End;
 
 End.

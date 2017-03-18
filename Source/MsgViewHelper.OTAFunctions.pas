@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    05 Mar 2017
+  @Date    15 Mar 2017
 
 **)
 Unit MsgViewHelper.OTAFunctions;
@@ -16,15 +16,21 @@ Interface
 
   Procedure ToggleMessageView;
   Procedure HideMessageView;
+  Function  CurrentDesktopName : String;
+  Function  HasErrorOrWarningMsgs : Boolean;
 
 Implementation
 
 Uses
+  //CodeSiteLogging,
   ToolsAPI,
+  Classes,
+  RTTI,
   {$IFDEF DXE20}VCL.Forms{$ELSE}Forms{$ENDIF},
   {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
   {$IFDEF DXE20}VCL.Controls{$ELSE}Controls{$ENDIF},
   {$IFDEF DXE20}Vcl.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
+  {$IFDEF DXE20}Vcl.StdCtrls{$ELSE}StdCtrls{$ENDIF},
   MsgViewHelper.Constants,
   MsgViewHelper.Types;
 
@@ -202,6 +208,34 @@ End;
 
 (**
 
+  This function returns an instance of the named componenot in the given form if found else returns
+  nil.
+
+  @precon  Form must be a valid instance.
+  @postcon Returns an instance of the named componenot in the given form if found else returns nil.
+
+  @param   Form             as a TForm
+  @param   strComponentName as a String
+  @return  a TComponent
+
+**)
+Function  FindComponent(Form : TForm; strComponentName : String) : TComponent;
+
+Var
+  iComponent: Integer;
+
+Begin
+  Result := Nil;
+  For iComponent := 0 To Form.ComponentCount - 1 Do
+    If CompareText(Form.Components[iComponent].Name, strComponentName) = 0 Then
+      Begin
+        Result := Form.Components[iComponent];
+        Break;
+      End;
+End;
+
+(**
+
   This method shows the message view with the build tab focused.
 
   @precon  None.
@@ -215,6 +249,7 @@ Procedure ShowMessageView(Form : TForm; DockSite : TWinControl);
 
 Var
   MsgServices: IOTAMessageServices;
+  C: TComponent;
 
 Begin
   If Assigned(DockSite) Then
@@ -224,6 +259,10 @@ Begin
   Form.SetFocus;
   If Supports(BorlandIDEServices, IOTAMessageServices, MsgServices) Then
     MsgServices.ShowMessageView(MsgServices.GetGroup('Build'));
+  C := FindComponent(Form, 'MessageTreeView0');
+  If Assigned(C) Then
+    If C Is TWinControl Then
+      (C As TWinControl).SetFocus;
 End;
 
 (**
@@ -280,6 +319,112 @@ Begin
       DockSite.Hide
     Else
       Form.Hide;
+End;
+
+(**
+
+  This function returns the current name of the desktop.
+
+  @precon  None.
+  @postcon Returns the current name of the desktop.
+
+  @return  a String
+
+**)
+Function  CurrentDesktopName : String;
+
+Var
+  F: TForm;
+  C: TComponent;
+  CB: TCustomComboBox;
+  Ctx: TRttiContext;
+  T: TRttiType;
+  P: TRttiProperty;
+  V: TValue;
+
+Begin
+  Result := '(not found)';
+  F := FindForm('AppBuilder');
+  If Assigned(F) Then
+    Begin
+      C := FindComponent(F, 'cbDesktop');
+      If Assigned(C) And (C Is TCustomComboBox) Then
+        Begin
+          CB := C As TCustomComboBox;
+          Ctx := TRTTIContext.Create;
+          Try
+            T := Ctx.GetType(CB.ClassType);
+            P := T.GetProperty('Text');
+            If Assigned(P) Then
+              Begin
+                V := P.GetValue(CB);
+                Result := V.AsString;
+              End;
+          Finally
+            Ctx.Free;
+          End;
+        End;
+    End;
+End;
+
+Function  HasErrorOrWarningMsgs : Boolean;
+
+Var
+  F : TForm;
+  C: TComponent;
+  P : TRttiProperty;
+  Ctx: TRttiContext;
+  T: TRttiType;
+  M: TRttiMethod;
+  V : TValue;
+  iNodeCount: Integer;
+  iNode: Integer;
+  Ptr: Pointer;
+  i : Integer;
+  Arg1 : TValue;
+  Arg2 : TValue;
+
+Begin
+  Result := False;
+  F := FindForm(strMessageViewForm);
+  If Assigned(F) Then
+    Begin
+      {C := FindComponent(F, 'MessageTreeView0');
+      CodeSite.SendFmtMsg('%s: %s', [C.Name, C.ClassName]);
+      Ctx := TRttiContext.Create;
+      Try
+        T := Ctx.GetType(C.ClassType);
+        P := T.GetProperty('RootNodeCount');
+        V := P.GetValue(C);
+        CodeSite.Send('RootNodeCount', V.AsInteger);
+        P := T.GetProperty('RootNode');
+        V := P.GetValue(C);
+        CodeSite.SendEnum('V', TypeInfo(TTypeKind), Ord(V.Kind));
+        V.ExtractRawData(@Ptr);
+        CodeSite.SendFmtMsg('RootNode: %p', [Ptr]);
+        M := T.GetMethod('GetFirstChild');
+        Arg1.From(Ptr);
+        V := M.Invoke(C, [Arg1]);
+        V.ExtractRawData(@Ptr);
+        CodeSite.SendFmtMsg('GetFirstChild: %p', [Ptr]);
+        //While Ptr <> Nil Do
+          Begin
+            M := T.GetMethod('GetNextSibling');
+            Arg1.From(Ptr);
+            V := M.Invoke(C, [Arg1]);
+            V.ExtractRawData(@Ptr);
+            CodeSite.SendFmtMsg('GetNextSibling: %p', [Ptr]);
+
+            //M := T.GetMethod('ZombieGetText');
+            //CodeSite.Send('M', M.ToString);
+            //Arg1.From(Ptr);
+            //Arg2 := 0;
+            //V := M.Invoke(C, [Arg1, Arg2]);
+          End;
+      Finally
+        Ctx.Free;
+      End;}
+    End;
 End;
 
 End.

@@ -2,9 +2,9 @@
 
 Author:  David Hoyle
 
-Version: 1.0
+Version: 1.0a
 
-Date:    05 Mar 2017
+Date:    18 Mar 2017
 
 
 
@@ -23,7 +23,7 @@ the code be used in a commercial product with out the author's consent.
 
 regards
 
-David Hoyle (c) 05 Mar 2017
+David Hoyle (c) 18 Mar 2017
 
 davidghoyle@gmail.com
 
