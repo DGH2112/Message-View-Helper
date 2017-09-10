@@ -2,9 +2,9 @@
 
 Author: David Hoyle
 
-Version: 1.0a
+Version: 1.0c
 
-Date: 18 Mar 2017
+Date:    10 Sep 2017
 
 Web Page: http://http://www.davidghoyle.co.uk/WordPress/?page_id=1590
 

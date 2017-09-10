@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    15 Mar 2017
+  @Date    14 Jul 2017
 
 **)
 Unit MsgViewHelper.OTAFunctions;
@@ -14,10 +14,10 @@ Interface
 
 {$INCLUDE CompilerDefinitions.inc}
 
-  Procedure ToggleMessageView;
-  Procedure HideMessageView;
-  Function  CurrentDesktopName : String;
-  Function  HasErrorOrWarningMsgs : Boolean;
+Procedure ToggleMessageView;
+Procedure HideMessageView;
+Function CurrentDesktopName: String;
+Function HasErrorOrWarningMsgs: Boolean;
 
 Implementation
 
@@ -29,8 +29,8 @@ Uses
   {$IFDEF DXE20}VCL.Forms{$ELSE}Forms{$ENDIF},
   {$IFDEF DXE20}System.SysUtils{$ELSE}SysUtils{$ENDIF},
   {$IFDEF DXE20}VCL.Controls{$ELSE}Controls{$ENDIF},
-  {$IFDEF DXE20}Vcl.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
-  {$IFDEF DXE20}Vcl.StdCtrls{$ELSE}StdCtrls{$ENDIF},
+  {$IFDEF DXE20}VCL.ExtCtrls{$ELSE}ExtCtrls{$ENDIF},
+  {$IFDEF DXE20}VCL.StdCtrls{$ELSE}StdCtrls{$ENDIF},
   MsgViewHelper.Constants,
   MsgViewHelper.Types;
 
@@ -45,7 +45,8 @@ Uses
   @return  a TForm
 
 **)
-Function FindForm(Const strFormName : String) : TForm;
+
+Function FindForm(Const strFormName: String): TForm;
 
 Var
   iForm: Integer;
@@ -73,7 +74,8 @@ End;
   @return  a Boolean
 
 **)
-Function IsDockableClassName(Const P : TWinControl) : Boolean;
+
+Function IsDockableClassName(Const P: TWinControl): Boolean;
 
 Var
   iDockClsName: Integer;
@@ -100,10 +102,11 @@ End;
   @return  a TWinControl
 
 **)
-Function FindDockSite(Const SourceControl : TWinControl) : TWinControl;
+
+Function FindDockSite(Const SourceControl: TWinControl): TWinControl;
 
 Var
-  P : TWinControl;
+  P: TWinControl;
 
 Begin
   Result := Nil;
@@ -116,7 +119,7 @@ Begin
           Break;
         End;
       P := P.Parent;
-   End;
+    End;
 End;
 
 (**
@@ -131,7 +134,8 @@ End;
   @return  a Boolean
 
 **)
-Function IsMessageViewFocused : Boolean;
+
+Function IsMessageViewFocused: Boolean;
 
 Var
   strActiveControl: String;
@@ -141,7 +145,8 @@ Begin
   If Assigned(Application.MainForm.ActiveControl) Then
     Begin
       strActiveControl := Application.MainForm.ActiveControl.ClassName;
-      Result := CompareText(strActiveControl, 'TBetterHintWindowVirtualDrawTree') = 0;
+      Result := CompareText(strActiveControl, 'TBetterHintWindowVirtualDrawTree')
+        = 0;
     End;
 End;
 
@@ -160,7 +165,9 @@ End;
   @return  a TMsgViewStates
 
 **)
-Function IsMessageViewVisible(Var Form : TForm; Var DockSite : TWinControl) : TMsgViewStates;
+
+Function IsMessageViewVisible(Var Form: TForm; Var DockSite: TWinControl):
+  TMsgViewStates;
 
 Begin
   Result := [];
@@ -169,19 +176,20 @@ Begin
   If Assigned(Form) Then
     Begin
       If Form.Floating Then
-        // If floating
+      // If floating
         Begin
           If Form.Visible Then
             Include(Result, mvsVisible);
           If Form.Active Then
             Include(Result, mvsFocused);
-        End Else
-        // If Docked
+        End
+      Else
+      // If Docked
         Begin
           DockSite := FindDockSite(Form);
           If DockSite Is TWinControl Then
             Begin
-              // If docked to a panel we don't want to hide the panel but the message window.
+        // If docked to a panel we don't want to hide the panel but the message window.
               If DockSite Is TPanel Then
                 Begin
                   If Form.Visible Then
@@ -191,8 +199,9 @@ Begin
                         Include(Result, mvsFocused);
                     End;
                   DockSite := Nil;
-                End Else
-                // If docked to a tabset we do want to hide the dock tabset
+                End
+              Else
+          // If docked to a tabset we do want to hide the dock tabset
                 Begin
                   If DockSite.Visible Then
                     Begin
@@ -219,7 +228,8 @@ End;
   @return  a TComponent
 
 **)
-Function  FindComponent(Form : TForm; strComponentName : String) : TComponent;
+
+Function FindComponent(Form: TForm; strComponentName: String): TComponent;
 
 Var
   iComponent: Integer;
@@ -245,7 +255,8 @@ End;
   @param   DockSite as a TWinControl
 
 **)
-Procedure ShowMessageView(Form : TForm; DockSite : TWinControl);
+
+Procedure ShowMessageView(Form: TForm; DockSite: TWinControl);
 
 Var
   MsgServices: IOTAMessageServices;
@@ -255,6 +266,9 @@ Begin
   If Assigned(DockSite) Then
     DockSite.Show
   Else
+    Form.Show;
+  // This is needed at IDE startup as the message view might not be visible in the dock control.
+  If Not Form.Visible Then
     Form.Show;
   Form.SetFocus;
   If Supports(BorlandIDEServices, IOTAMessageServices, MsgServices) Then
@@ -273,12 +287,15 @@ End;
   @postcon The message view is either hidden or shown.
 
 **)
+
 Procedure ToggleMessageView;
 
 Var
   Form: TForm;
   DockSite: TWinControl;
-  MsgViewStates : TMsgViewStates;
+  MsgViewStates: TMsgViewStates;
+  F: TForm;
+  C: TComponent;
 
 Begin
   MsgViewStates := IsMessageViewVisible(Form, DockSite);
@@ -291,10 +308,19 @@ Begin
               DockSite.Hide
             Else
               Form.Hide;
-          End Else
-            ShowMessageView(Form, DockSite);
-      End Else
-        ShowMessageView(Form, DockSite);
+              F := FindForm('EditWindow_0');
+              If Assigned(F) Then
+                Begin
+                  C := FindComponent(F, 'Editor');
+                  If Assigned(C) Then
+                    (C As TWinControl).SetFocus;
+                End;
+          End
+        Else
+          ShowMessageView(Form, DockSite);
+      End
+    Else
+      ShowMessageView(Form, DockSite);
 End;
 
 (**
@@ -305,11 +331,12 @@ End;
   @postcon The message view is hidden if found.
 
 **)
+
 Procedure HideMessageView;
 
 Var
   MsgViewState: TMsgViewStates;
-  Form : TForm;
+  Form: TForm;
   DockSite: TWinControl;
 
 Begin
@@ -331,7 +358,8 @@ End;
   @return  a String
 
 **)
-Function  CurrentDesktopName : String;
+
+Function CurrentDesktopName: String;
 
 Var
   F: TForm;
@@ -351,7 +379,7 @@ Begin
       If Assigned(C) And (C Is TCustomComboBox) Then
         Begin
           CB := C As TCustomComboBox;
-          Ctx := TRTTIContext.Create;
+          Ctx := TRttiContext.Create;
           Try
             T := Ctx.GetType(CB.ClassType);
             P := T.GetProperty('Text');
@@ -367,11 +395,11 @@ Begin
     End;
 End;
 
-Function  HasErrorOrWarningMsgs : Boolean;
+Function HasErrorOrWarningMsgs: Boolean;
 
 Var
-  F : TForm;
-  C: TComponent;
+  F: TForm;
+  {C: TComponent;
   P : TRttiProperty;
   Ctx: TRttiContext;
   T: TRttiType;
@@ -382,59 +410,49 @@ Var
   Ptr: Pointer;
   i : Integer;
   Arg1 : TValue;
-  Arg2 : TValue;
+  Arg2 : TValue;}
 
 Begin
   Result := False;
   F := FindForm(strMessageViewForm);
   If Assigned(F) Then
     Begin
-      {C := FindComponent(F, 'MessageTreeView0');
-      CodeSite.SendFmtMsg('%s: %s', [C.Name, C.ClassName]);
-      Ctx := TRttiContext.Create;
-      Try
-        T := Ctx.GetType(C.ClassType);
-        P := T.GetProperty('RootNodeCount');
-        V := P.GetValue(C);
-        CodeSite.Send('RootNodeCount', V.AsInteger);
-        P := T.GetProperty('RootNode');
-        V := P.GetValue(C);
-        CodeSite.SendEnum('V', TypeInfo(TTypeKind), Ord(V.Kind));
-        V.ExtractRawData(@Ptr);
-        CodeSite.SendFmtMsg('RootNode: %p', [Ptr]);
-        M := T.GetMethod('GetFirstChild');
-        Arg1.From(Ptr);
-        V := M.Invoke(C, [Arg1]);
-        V.ExtractRawData(@Ptr);
-        CodeSite.SendFmtMsg('GetFirstChild: %p', [Ptr]);
-        //While Ptr <> Nil Do
-          Begin
-            M := T.GetMethod('GetNextSibling');
-            Arg1.From(Ptr);
-            V := M.Invoke(C, [Arg1]);
-            V.ExtractRawData(@Ptr);
-            CodeSite.SendFmtMsg('GetNextSibling: %p', [Ptr]);
+    {C := FindComponent(F, 'MessageTreeView0');
+    CodeSite.SendFmtMsg('%s: %s', [C.Name, C.ClassName]);
+    Ctx := TRttiContext.Create;
+    Try
+      T := Ctx.GetType(C.ClassType);
+      P := T.GetProperty('RootNodeCount');
+      V := P.GetValue(C);
+      CodeSite.Send('RootNodeCount', V.AsInteger);
+      P := T.GetProperty('RootNode');
+      V := P.GetValue(C);
+      CodeSite.SendEnum('V', TypeInfo(TTypeKind), Ord(V.Kind));
+      V.ExtractRawData(@Ptr);
+      CodeSite.SendFmtMsg('RootNode: %p', [Ptr]);
+      M := T.GetMethod('GetFirstChild');
+      Arg1.From(Ptr);
+      V := M.Invoke(C, [Arg1]);
+      V.ExtractRawData(@Ptr);
+      CodeSite.SendFmtMsg('GetFirstChild: %p', [Ptr]);
+      //While Ptr <> Nil Do
+        Begin
+          M := T.GetMethod('GetNextSibling');
+          Arg1.From(Ptr);
+          V := M.Invoke(C, [Arg1]);
+          V.ExtractRawData(@Ptr);
+          CodeSite.SendFmtMsg('GetNextSibling: %p', [Ptr]);
 
-            //M := T.GetMethod('ZombieGetText');
-            //CodeSite.Send('M', M.ToString);
-            //Arg1.From(Ptr);
-            //Arg2 := 0;
-            //V := M.Invoke(C, [Arg1, Arg2]);
-          End;
-      Finally
-        Ctx.Free;
-      End;}
+          //M := T.GetMethod('ZombieGetText');
+          //CodeSite.Send('M', M.ToString);
+          //Arg1.From(Ptr);
+          //Arg2 := 0;
+          //V := M.Invoke(C, [Arg1, Arg2]);
+        End;
+    Finally
+      Ctx.Free;
+    End;}
     End;
 End;
 
 End.
-
-
-
-
-
-
-
-
-
-

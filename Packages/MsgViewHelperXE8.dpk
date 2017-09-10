@@ -1,0 +1,53 @@
+package MsgViewHelperXE8;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'Message  View Helper 1.0'}
+{$DESIGNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl,
+  designide;
+
+contains
+  MsgViewHelper.Wizard in '..\Source\MsgViewHelper.Wizard.pas',
+  MsgViewHelper.OTAFunctions in '..\Source\MsgViewHelper.OTAFunctions.pas',
+  MsgViewHelper.CompilerNotifer in '..\Source\MsgViewHelper.CompilerNotifer.pas',
+  MsgViewHelper.OptionsFrame in '..\Source\MsgViewHelper.OptionsFrame.pas' {frameMVHOptions: TFrame},
+  MsgViewHelper.Options in '..\Source\MsgViewHelper.Options.pas',
+  MsgViewHelper.Interfaces in '..\Source\MsgViewHelper.Interfaces.pas',
+  MsgViewHelper.Functions in '..\Source\MsgViewHelper.Functions.pas',
+  MsgViewHelper.Types in '..\Source\MsgViewHelper.Types.pas',
+  MsgViewHelper.Constants in '..\Source\MsgViewHelper.Constants.pas',
+  MsgViewHelper.ResourceStrings in '..\Source\MsgViewHelper.ResourceStrings.pas',
+  MsgViewHelper.SplashScreen in '..\Source\MsgViewHelper.SplashScreen.pas',
+  MsgViewHelper.AboutBox in '..\Source\MsgViewHelper.AboutBox.pas',
+  MsgViewHelper.OptionsForm in '..\Source\MsgViewHelper.OptionsForm.pas' {frmMVHOptions},
+  MsgViewHelper.OptionsIDEInterface in '..\Source\MsgViewHelper.OptionsIDEInterface.pas';
+
+end.
