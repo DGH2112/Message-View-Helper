@@ -4,7 +4,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    26 Feb 2017
+  @Date    04 Jan 2018
 
 **)
 Unit MsgViewHelper.AboutBox;
@@ -12,7 +12,7 @@ Unit MsgViewHelper.AboutBox;
 Interface
 
   Function  AddAboutBoxEntry : Integer;
-  Procedure RemoveAboutBoxEntry(iIndex : Integer);
+  Procedure RemoveAboutBoxEntry(Const iIndex : Integer);
 
 Implementation
 
@@ -37,6 +37,12 @@ Uses
 **)
 Function AddAboutBoxEntry : Integer;
 
+ResourceString
+  strSKUBuild = 'SKU Build %d.%d.%d.%d';
+
+Const
+  strMessageViewHelper = 'MessageViewHelper48x48';
+
 Var
   iMajor : Integer;
   iMinor : Integer;
@@ -48,16 +54,16 @@ Var
 Begin
   Result := -1;
   BuildNumber(iMajor, iMinor, iBugFix, iBuild);
-  bmSplashScreen := LoadBitmap(hInstance, 'MessageViewHelper48x48');
+  bmSplashScreen := LoadBitmap(hInstance, strMessageViewHelper);
   If Supports(BorlandIDEServices, IOTAAboutBoxServices, AboutBoxServices) Then
     Result := AboutBoxServices.AddPluginInfo(
       Format(strSplashScreenName, [iMajor, iMinor, Copy(strRevision, iBugFix + 1, 1),
         Application.Title]),
       strAboutBoxDescription,
       bmSplashScreen,
-      False,
+      {$IFDEF DEBUG} True {$ELSE} False {$ENDIF},
       Format(strSplashScreenBuild, [iMajor, iMinor, iBugfix, iBuild]),
-      Format('SKU Build %d.%d.%d.%d', [iMajor, iMinor, iBugfix, iBuild]));
+      Format(strSKUBuild, [iMajor, iMinor, iBugfix, iBuild]));
 End;
 
 (**
@@ -67,10 +73,10 @@ End;
   @precon  None.
   @postcon The about box entry is removed from the IDE.
 
-  @param   iIndex as an Integer
+  @param   iIndex as an Integer as a constant
 
 **)
-Procedure RemoveAboutBoxEntry(iIndex : Integer);
+Procedure RemoveAboutBoxEntry(Const iIndex : Integer);
 
 Var
   AboutBoxServices : IOTAAboutBoxServices;

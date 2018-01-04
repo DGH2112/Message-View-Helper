@@ -4,7 +4,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    27 Feb 2017
+  @Date    04 Jan 2018
 
 **)
 Unit MsgViewHelper.SplashScreen;
@@ -34,6 +34,9 @@ Uses
 **)
 Procedure AddSplashScreen;
 
+Const
+  strMessageViewHelper = 'MessageViewHelper24x24';
+
 Var
   iMajor : Integer;
   iMinor : Integer;
@@ -44,13 +47,13 @@ Var
 
 Begin
   BuildNumber(iMajor, iMinor, iBugFix, iBuild);
-  bmSplashScreen := LoadBitmap(hInstance, 'MessageViewHelper24x24');
+  bmSplashScreen := LoadBitmap(hInstance, strMessageViewHelper);
   If Supports(SplashScreenServices, IOTASplashScreenServices, SSServices) Then
     SSServices.AddPluginBitmap(
       Format(strSplashScreenName, [iMajor, iMinor, Copy(strRevision, iBugFix + 1, 1),
         Application.Title]),
       bmSplashScreen,
-      False,
+      {$IFDEF DEBUG} True {$ELSE} False {$ENDIF},
       Format(strSplashScreenBuild, [iMajor, iMinor, iBugfix, iBuild]), ''
     );
 End;
