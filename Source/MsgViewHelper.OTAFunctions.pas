@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    14 Jul 2017
+  @Date    04 Jan 2018
 
 **)
 Unit MsgViewHelper.OTAFunctions;
@@ -34,58 +34,89 @@ Uses
   MsgViewHelper.Constants,
   MsgViewHelper.Types;
 
+Function FindForm(Const strFormName: String): TForm; Forward;
+Function FindComponent(Const Form: TForm; Const strComponentName: String): TComponent; Forward;
+Function IsDockableClassName(Const P: TWinControl): Boolean; Forward;
+Function IsMessageViewVisible(Var Form: TForm; Var DockSite: TWinControl) : TMsgViewStates; Forward;
+
 (**
 
-  This method attempts to find an named form in the IDEs list of forms.
+  This function returns the current name of the desktop.
 
   @precon  None.
-  @postcon If the form is found a reference to the form is returned.
+  @postcon Returns the current name of the desktop.
 
-  @param   strFormName as a String as a constant
-  @return  a TForm
+  @return  a String
 
 **)
 
-Function FindForm(Const strFormName: String): TForm;
+Function CurrentDesktopName: String;
+
+ResourceString
+  strNotFound = '(not found)';
+
+Const
+  strAppBuilder = 'AppBuilder';
+  strCbDesktopName = 'cbDesktop';
+  strTextProperty = 'Text';
 
 Var
-  iForm: Integer;
+  F: TForm;
+  C: TComponent;
+  CB: TCustomComboBox;
+  Ctx: TRttiContext;
+  T: TRttiType;
+  P: TRttiProperty;
+  V: TValue;
 
 Begin
-  Result := Nil;
-  For iForm := 0 To Screen.FormCount - 1 Do
-    If CompareText(strFormName, Screen.Forms[iForm].Name) = 0 Then
-      Begin
-        Result := Screen.Forms[iForm];
-        Break;
-      End;
+  Result := strNotFound;
+  F := FindForm(strAppBuilder);
+  If Assigned(F) Then
+    Begin
+      C := FindComponent(F, strCbDesktopName);
+      If Assigned(C) And (C Is TCustomComboBox) Then
+        Begin
+          CB := C As TCustomComboBox;
+          Ctx := TRttiContext.Create;
+          Try
+            T := Ctx.GetType(CB.ClassType);
+            P := T.GetProperty(strTextProperty);
+            If Assigned(P) Then
+              Begin
+                V := P.GetValue(CB);
+                Result := V.AsString;
+              End;
+          Finally
+            Ctx.Free;
+          End;
+        End;
+    End;
 End;
 
 (**
 
-  This method returns true of the given windows control matches any of the dockable class names in
-  the IDE.
+  This function returns an instance of the named componenot in the given form if found else returns nil.
 
-  @precon  P must be a valid instance.
-  @postcon Returns true of the given windows control matches any of the dockable class names in
-           the IDE.
+  @precon  Form must be a valid instance.
+  @postcon Returns an instance of the named componenot in the given form if found else returns nil.
 
-  @param   P as a TWinControl as a constant
-  @return  a Boolean
+  @param   Form             as a TForm as a constant
+  @param   strComponentName as a String as a constant
+  @return  a TComponent
 
 **)
-
-Function IsDockableClassName(Const P: TWinControl): Boolean;
+Function FindComponent(Const Form: TForm; Const strComponentName: String): TComponent;
 
 Var
-  iDockClsName: Integer;
+  iComponent: Integer;
 
 Begin
-  Result := False;
-  For iDockClsName := Low(strDockClsNames) To High(strDockClsNames) Do
-    If CompareText(P.ClassName, strDockClsNames[iDockClsName]) = 0 Then
+  Result := Nil;
+  For iComponent := 0 To Form.ComponentCount - 1 Do
+    If CompareText(Form.Components[iComponent].Name, strComponentName) = 0 Then
       Begin
-        Result := True;
+        Result := Form.Components[iComponent];
         Break;
       End;
 End;
@@ -124,277 +155,32 @@ End;
 
 (**
 
-  This method determines whether the message view has focus by looking at what the main forms
-  active control is. Returns true if the active control has the classname
-  "TBetterHintWindowVirtualDrawTree".
+  This method attempts to find an named form in the IDEs list of forms.
 
   @precon  None.
-  @postcon Returns true of the message view is the active control.
+  @postcon If the form is found a reference to the form is returned.
 
-  @return  a Boolean
+  @param   strFormName as a String as a constant
+  @return  a TForm
 
 **)
 
-Function IsMessageViewFocused: Boolean;
+Function FindForm(Const strFormName: String): TForm;
 
 Var
-  strActiveControl: String;
-
-Begin
-  Result := False;
-  If Assigned(Application.MainForm.ActiveControl) Then
-    Begin
-      strActiveControl := Application.MainForm.ActiveControl.ClassName;
-      Result := CompareText(strActiveControl, 'TBetterHintWindowVirtualDrawTree')
-        = 0;
-    End;
-End;
-
-(**
-
-  This method returned and set contain enumerate values saying whether the message window is
-  visible and focused. It also returns via VAR parameter the message form instance and if docked
-  the dock windows control reference.
-
-  @precon  None.
-  @postcon Returns a set says whether the message view is visible and focused along with the form
-           instance and docking site (if docked).
-
-  @param   Form     as a TForm as a reference
-  @param   DockSite as a TWinControl as a reference
-  @return  a TMsgViewStates
-
-**)
-
-Function IsMessageViewVisible(Var Form: TForm; Var DockSite: TWinControl):
-  TMsgViewStates;
-
-Begin
-  Result := [];
-  Form := FindForm(strMessageViewForm);
-  DockSite := Nil;
-  If Assigned(Form) Then
-    Begin
-      If Form.Floating Then
-      // If floating
-        Begin
-          If Form.Visible Then
-            Include(Result, mvsVisible);
-          If Form.Active Then
-            Include(Result, mvsFocused);
-        End
-      Else
-      // If Docked
-        Begin
-          DockSite := FindDockSite(Form);
-          If DockSite Is TWinControl Then
-            Begin
-        // If docked to a panel we don't want to hide the panel but the message window.
-              If DockSite Is TPanel Then
-                Begin
-                  If Form.Visible Then
-                    Begin
-                      Include(Result, mvsVisible);
-                      If IsMessageViewFocused Then
-                        Include(Result, mvsFocused);
-                    End;
-                  DockSite := Nil;
-                End
-              Else
-          // If docked to a tabset we do want to hide the dock tabset
-                Begin
-                  If DockSite.Visible Then
-                    Begin
-                      Include(Result, mvsVisible);
-                      If IsMessageViewFocused Then
-                        Include(Result, mvsFocused);
-                    End;
-                End;
-            End;
-        End;
-    End;
-End;
-
-(**
-
-  This function returns an instance of the named componenot in the given form if found else returns
-  nil.
-
-  @precon  Form must be a valid instance.
-  @postcon Returns an instance of the named componenot in the given form if found else returns nil.
-
-  @param   Form             as a TForm
-  @param   strComponentName as a String
-  @return  a TComponent
-
-**)
-
-Function FindComponent(Form: TForm; strComponentName: String): TComponent;
-
-Var
-  iComponent: Integer;
+  iForm: Integer;
 
 Begin
   Result := Nil;
-  For iComponent := 0 To Form.ComponentCount - 1 Do
-    If CompareText(Form.Components[iComponent].Name, strComponentName) = 0 Then
+  For iForm := 0 To Screen.FormCount - 1 Do
+    If CompareText(strFormName, Screen.Forms[iForm].Name) = 0 Then
       Begin
-        Result := Form.Components[iComponent];
+        Result := Screen.Forms[iForm];
         Break;
       End;
 End;
 
-(**
-
-  This method shows the message view with the build tab focused.
-
-  @precon  None.
-  @postcon The message view is displayed.
-
-  @param   Form     as a TForm
-  @param   DockSite as a TWinControl
-
-**)
-
-Procedure ShowMessageView(Form: TForm; DockSite: TWinControl);
-
-Var
-  MsgServices: IOTAMessageServices;
-  C: TComponent;
-
-Begin
-  If Assigned(DockSite) Then
-    DockSite.Show
-  Else
-    Form.Show;
-  // This is needed at IDE startup as the message view might not be visible in the dock control.
-  If Not Form.Visible Then
-    Form.Show;
-  Form.SetFocus;
-  If Supports(BorlandIDEServices, IOTAMessageServices, MsgServices) Then
-    MsgServices.ShowMessageView(MsgServices.GetGroup('Build'));
-  C := FindComponent(Form, 'MessageTreeView0');
-  If Assigned(C) Then
-    If C Is TWinControl Then
-      (C As TWinControl).SetFocus;
-End;
-
-(**
-
-  This method shows the message view if it is not visible or hides it if it is.
-
-  @precon  None.
-  @postcon The message view is either hidden or shown.
-
-**)
-
-Procedure ToggleMessageView;
-
-Var
-  Form: TForm;
-  DockSite: TWinControl;
-  MsgViewStates: TMsgViewStates;
-  F: TForm;
-  C: TComponent;
-
-Begin
-  MsgViewStates := IsMessageViewVisible(Form, DockSite);
-  If Assigned(Form) Then
-    If mvsVisible In MsgViewStates Then
-      Begin
-        If mvsFocused In MsgViewStates Then
-          Begin
-            If Assigned(DockSite) Then
-              DockSite.Hide
-            Else
-              Form.Hide;
-              F := FindForm('EditWindow_0');
-              If Assigned(F) Then
-                Begin
-                  C := FindComponent(F, 'Editor');
-                  If Assigned(C) Then
-                    (C As TWinControl).SetFocus;
-                End;
-          End
-        Else
-          ShowMessageView(Form, DockSite);
-      End
-    Else
-      ShowMessageView(Form, DockSite);
-End;
-
-(**
-
-  This method atempts to hide the message view or if dicked its dock host.
-
-  @precon  None.
-  @postcon The message view is hidden if found.
-
-**)
-
-Procedure HideMessageView;
-
-Var
-  MsgViewState: TMsgViewStates;
-  Form: TForm;
-  DockSite: TWinControl;
-
-Begin
-  MsgViewState := IsMessageViewVisible(Form, DockSite);
-  If Assigned(Form) Then
-    If Assigned(DockSite) Then
-      DockSite.Hide
-    Else
-      Form.Hide;
-End;
-
-(**
-
-  This function returns the current name of the desktop.
-
-  @precon  None.
-  @postcon Returns the current name of the desktop.
-
-  @return  a String
-
-**)
-
-Function CurrentDesktopName: String;
-
-Var
-  F: TForm;
-  C: TComponent;
-  CB: TCustomComboBox;
-  Ctx: TRttiContext;
-  T: TRttiType;
-  P: TRttiProperty;
-  V: TValue;
-
-Begin
-  Result := '(not found)';
-  F := FindForm('AppBuilder');
-  If Assigned(F) Then
-    Begin
-      C := FindComponent(F, 'cbDesktop');
-      If Assigned(C) And (C Is TCustomComboBox) Then
-        Begin
-          CB := C As TCustomComboBox;
-          Ctx := TRttiContext.Create;
-          Try
-            T := Ctx.GetType(CB.ClassType);
-            P := T.GetProperty('Text');
-            If Assigned(P) Then
-              Begin
-                V := P.GetValue(CB);
-                Result := V.AsString;
-              End;
-          Finally
-            Ctx.Free;
-          End;
-        End;
-    End;
-End;
-
+//: @nodocumentation @nochecks @nometrics
 Function HasErrorOrWarningMsgs: Boolean;
 
 Var
@@ -455,4 +241,238 @@ Begin
     End;
 End;
 
+(**
+
+  This method atempts to hide the message view or if dicked its dock host.
+
+  @precon  None.
+  @postcon The message view is hidden if found.
+
+**)
+
+Procedure HideMessageView;
+
+Var
+  MsgViewState: TMsgViewStates;
+  Form: TForm;
+  DockSite: TWinControl;
+
+Begin
+  MsgViewState := IsMessageViewVisible(Form, DockSite);
+  If Assigned(Form) Then
+    If Assigned(DockSite) Then
+      DockSite.Hide
+    Else
+      Form.Hide;
+End;
+
+(**
+
+  This method returns true of the given windows control matches any of the dockable class names in
+  the IDE.
+
+  @precon  P must be a valid instance.
+  @postcon Returns true of the given windows control matches any of the dockable class names in
+           the IDE.
+
+  @param   P as a TWinControl as a constant
+  @return  a Boolean
+
+**)
+
+Function IsDockableClassName(Const P: TWinControl): Boolean;
+
+Var
+  iDockClsName: Integer;
+
+Begin
+  Result := False;
+  For iDockClsName := Low(strDockClsNames) To High(strDockClsNames) Do
+    If CompareText(P.ClassName, strDockClsNames[iDockClsName]) = 0 Then
+      Begin
+        Result := True;
+        Break;
+      End;
+End;
+
+(**
+
+  This method determines whether the message view has focus by looking at what the main forms
+  active control is. Returns true if the active control has the classname
+  "TBetterHintWindowVirtualDrawTree".
+
+  @precon  None.
+  @postcon Returns true of the message view is the active control.
+
+  @return  a Boolean
+
+**)
+
+Function IsMessageViewFocused: Boolean;
+
+Const
+  strTBetterHintWindowVirtualDrawTree = 'TBetterHintWindowVirtualDrawTree';
+
+Var
+  strActiveControl: String;
+
+Begin
+  Result := False;
+  If Assigned(Application.MainForm.ActiveControl) Then
+    Begin
+      strActiveControl := Application.MainForm.ActiveControl.ClassName;
+      Result := CompareText(strActiveControl, strTBetterHintWindowVirtualDrawTree) = 0;
+    End;
+End;
+
+(**
+
+  This method returned and set contain enumerate values saying whether the message window is
+  visible and focused. It also returns via VAR parameter the message form instance and if docked
+  the dock windows control reference.
+
+  @precon  None.
+  @postcon Returns a set says whether the message view is visible and focused along with the form
+           instance and docking site (if docked).
+
+  @param   Form     as a TForm as a reference
+  @param   DockSite as a TWinControl as a reference
+  @return  a TMsgViewStates
+
+**)
+
+Function IsMessageViewVisible(Var Form: TForm; Var DockSite: TWinControl) : TMsgViewStates;
+
+Begin
+  Result := [];
+  Form := FindForm(strMessageViewForm);
+  DockSite := Nil;
+  If Assigned(Form) Then
+    Begin
+      If Form.Floating Then
+      // If floating
+        Begin
+          If Form.Visible Then
+            Include(Result, mvsVisible);
+          If Form.Active Then
+            Include(Result, mvsFocused);
+        End
+      Else
+      // If Docked
+        Begin
+          DockSite := FindDockSite(Form);
+          If DockSite Is TWinControl Then
+            Begin
+        // If docked to a panel we don't want to hide the panel but the message window.
+              If DockSite Is TPanel Then
+                Begin
+                  If Form.Visible Then
+                    Begin
+                      Include(Result, mvsVisible);
+                      If IsMessageViewFocused Then
+                        Include(Result, mvsFocused);
+                    End;
+                  DockSite := Nil;
+                End
+              Else
+          // If docked to a tabset we do want to hide the dock tabset
+                Begin
+                  If DockSite.Visible Then
+                    Begin
+                      Include(Result, mvsVisible);
+                      If IsMessageViewFocused Then
+                        Include(Result, mvsFocused);
+                    End;
+                End;
+            End;
+        End;
+    End;
+End;
+
+(**
+
+  This method shows the message view with the build tab focused.
+
+  @precon  None.
+  @postcon The message view is displayed.
+
+  @param   Form     as a TForm as a constant
+  @param   DockSite as a TWinControl as a constant
+
+**)
+Procedure ShowMessageView(Const Form: TForm; Const DockSite: TWinControl);
+
+Const
+  strBuildPage = 'Build';
+  strMessageTreeViewName = 'MessageTreeView0';
+
+Var
+  MsgServices: IOTAMessageServices;
+  C: TComponent;
+
+Begin
+  If Assigned(DockSite) Then
+    DockSite.Show
+  Else
+    Form.Show;
+  // This is needed at IDE startup as the message view might not be visible in the dock control.
+  If Not Form.Visible Then
+    Form.Show;
+  Form.SetFocus;
+  If Supports(BorlandIDEServices, IOTAMessageServices, MsgServices) Then
+    MsgServices.ShowMessageView(MsgServices.GetGroup(strBuildPage));
+  C := FindComponent(Form, strMessageTreeViewName);
+  If Assigned(C) Then
+    If C Is TWinControl Then
+      (C As TWinControl).SetFocus;
+End;
+
+(**
+
+  This method shows the message view if it is not visible or hides it if it is.
+
+  @precon  None.
+  @postcon The message view is either hidden or shown.
+
+**)
+
+Procedure ToggleMessageView;
+
+Const
+  strEditWindowName = 'EditWindow_0';
+  strEditorName = 'Editor';
+
+Var
+  Form: TForm;
+  DockSite: TWinControl;
+  MsgViewStates: TMsgViewStates;
+  F: TForm;
+  C: TComponent;
+
+Begin
+  MsgViewStates := IsMessageViewVisible(Form, DockSite);
+  If Assigned(Form) Then
+    If mvsVisible In MsgViewStates Then
+      Begin
+        If mvsFocused In MsgViewStates Then
+          Begin
+            If Assigned(DockSite) Then
+              DockSite.Hide
+            Else
+              Form.Hide;
+              F := FindForm(strEditWindowName);
+              If Assigned(F) Then
+                Begin
+                  C := FindComponent(F, strEditorName);
+                  If Assigned(C) Then
+                    If (C As TWinControl).CanFocus Then
+                      (C As TWinControl).SetFocus;
+                End;
+          End
+        Else
+          ShowMessageView(Form, DockSite);
+      End
+    Else
+      ShowMessageView(Form, DockSite);
+End;
 End.
