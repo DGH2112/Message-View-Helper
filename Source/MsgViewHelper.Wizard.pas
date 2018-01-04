@@ -5,7 +5,7 @@
 
   @Author  David Hoyle
   @Version 1.0
-  @Date    14 Jul 2017
+  @Date    04 Jan 2018
 
 **)
 Unit MsgViewHelper.Wizard;
@@ -91,6 +91,8 @@ End;
   @precon  None.
   @postcon None.
 
+  @nocheck EmptyMethod
+
 **)
 Procedure TMVHWizard.AfterSave;
 
@@ -104,6 +106,8 @@ End;
 
   @precon  None.
   @postcon None.
+
+  @nocheck EmptyMethod
 
 **)
 Procedure TMVHWizard.BeforeSave;
@@ -122,6 +126,13 @@ End;
 **)
 Constructor TMVHWizard.Create;
 
+Const
+  strDGHMsgViewHelperToggleMsgVwName = 'DGHMsgViewHelperToggleMessageView';
+  strOTATemplateMenus = 'OTATemplateMenus';
+
+ResourceString
+  strToggleMessageView = 'Toggle Message View';
+
 Var
   NService: INTAServices;
 
@@ -133,11 +144,11 @@ Begin
     Begin
       FToggleMsgViewAction := TAction.Create(NService.ActionList);
       FToggleMsgViewAction.ActionList := NService.ActionList;
-      FToggleMsgViewAction.Name := 'DGHMsgViewHelperToggleMessageView';
-      FToggleMsgViewAction.Caption := 'Toggle Message View';
+      FToggleMsgViewAction.Name := strDGHMsgViewHelperToggleMsgVwName;
+      FToggleMsgViewAction.Caption := strToggleMessageView;
       FToggleMsgViewAction.OnExecute := ToggleMessageViewAction;
       FToggleMsgViewAction.ShortCut := TMVHOptions.MVHOptions.MessageViewShortCut;
-      FToggleMsgViewAction.Category := 'OTATemplateMenus';
+      FToggleMsgViewAction.Category := strOTATemplateMenus;
     End;
   FCompileNotifierIndex := InstallCompileNotifier;
   {$IFDEF DXE00}
@@ -173,6 +184,8 @@ End;
   @precon  None.
   @postcon None.
 
+  @nocheck EmptyMethod
+
 **)
 Procedure TMVHWizard.Destroyed;
 
@@ -191,13 +204,16 @@ End;
 **)
 Procedure TMVHWizard.Execute;
 
+ResourceString
+  strMessageViewHelper = 'Message View Helper';
+
 Var
   Services : IOTAServices;
 
 Begin
   {$IFDEF DXE00}
   If Supports(BorlandIDEServices, IOTAServices, Services) Then
-    Services.GetEnvironmentOptions.EditOptions('', 'Message View Helper');
+    Services.GetEnvironmentOptions.EditOptions('', strMessageViewHelper);
   {$ELSE}
   If TfrmMVHOptions.Execute Then
   {$ENDIF}
@@ -216,8 +232,11 @@ End;
 **)
 Function TMVHWizard.GetIDString: String;
 
+Const
+  strDGHMsgViewHelperWizard = 'DGH.MsgViewHelper.Wizard';
+
 Begin
-  Result := 'DGH.MsgViewHelper.Wizard';
+  Result := strDGHMsgViewHelperWizard;
 End;
 
 {$IFNDEF DXE00}
@@ -233,8 +252,11 @@ End;
 **)
 Function TMVHWizard.GetMenuText: String;
 
+ResourceString
+  strMessageViewHelperOptions = 'Message View Helper Options';
+
 Begin
-  Result := 'Message View Helper Options';
+  Result := strMessageViewHelperOptions;
 End;
 {$ENDIF}
 
@@ -250,8 +272,11 @@ End;
 **)
 Function TMVHWizard.GetName: String;
 
+ResourceString
+  strMessageViewHelper = 'Message View Helper';
+
 Begin
-  Result := 'Message View Helper';
+  Result := strMessageViewHelper;
 End;
 
 (**
@@ -276,6 +301,8 @@ End;
 
   @precon  None.
   @postcon None.
+
+  @nocheck EmptyMethod
 
 **)
 Procedure TMVHWizard.Modified;
